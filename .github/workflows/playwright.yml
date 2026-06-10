@@ -1,15 +1,25 @@
 name: Playwright Tests
+
 on:
   push:
     branches: [ main, master ]
   pull_request:
     branches: [ main, master ]
-  workflow_dispatch: # Allows manual triggering from the GitHub UI
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
 
 jobs:
   test:
     timeout-minutes: 30
     runs-on: ubuntu-latest
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
     - name: Checkout repository
@@ -19,27 +29,66 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        cache: 'pip' # Speeds up subsequent runs by caching dependencies
+        cache: 'pip'
 
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Ensure system dependencies & install Playwright Browsers
+    - name: Install Playwright Browsers
       run: |
-        # Installs chromium, firefox, webkit and their OS-level system dependencies
         playwright install --with-deps
 
     - name: Run Playwright tests and generate reports
       run: |
         python utils/generate_reports.py
 
+    - name: Setup Pages
+      uses: actions/configure-pages@v5
+
     - name: Upload Test Artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: pytest-results
-        path: |
-          reports/
+        path: reports/
         retention-days: 30
+
+    - name: Publish Test Summary
+      if: always()
+      run: |
+        latest_run=$(ls -dt reports/run_* | head -1)
+
+        echo "# Playwright Test Results" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+
+        if [ -f "$latest_run/summary.txt" ]; then
+          cat "$latest_run/summary.txt" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "No summary file found." >> $GITHUB_STEP_SUMMARY
+        fi
+
+    - name: Prepare GitHub Pages Site
+      if: always()
+      run: |
+        latest_run=$(ls -dt reports/run_* | head -1)
+
+        mkdir -p site
+
+        cp "$latest_run/report.html" site/index.html
+
+        if [ -d "$latest_run/screenshots" ]; then
+          cp -r "$latest_run/screenshots" site/
+        fi
+
+    - name: Upload GitHub Pages Artifact
+      if: always()
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: site
+
+    - name: Deploy to GitHub Pages
+      if: always()
+      id: deployment
+      uses: actions/deploy-pages@v4

@@ -1,0 +1,2 @@
+2026-06-10 14:05:18,540 INFO Starting test: tests/test_checkout_flow.py::test_login_to_checkout_flow
+2026-06-10 14:05:22,026 INFO Finished test: tests/test_checkout_flow.py::test_login_to_checkout_flow
