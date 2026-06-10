@@ -65,18 +65,18 @@ jobs:
         echo "=== reports/run_*/allure-results ==="
         find reports -maxdepth 3 -type d -name 'allure-results' -print || true
 
-    - name: Generate Allure Report
-      if: always()
-      run: |
-        rm -rf allure-results allure-report site
+    # - name: Generate Allure Report
+    #   if: always()
+    #   run: |
+    #     rm -rf allure-results allure-report site
 
-        if [ -d "reports/run_*/allure-results" ]; then
-          latest_run=$(ls -dt reports/run_* | head -1)
-          allure generate "$latest_run/allure-results" -o "$latest_run/allure-report" --clean
-        else
-          echo "No Allure results found under reports/" >&2
-          exit 1
-        fi
+    #     if [ -d "reports/run_*/allure-results" ]; then
+    #       latest_run=$(ls -dt reports/run_* | head -1)
+    #       allure generate "$latest_run/allure-results" -o "$latest_run/allure-report" --clean
+    #     else
+    #       echo "No Allure results found under reports/" >&2
+    #       exit 1
+    #     fi
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
