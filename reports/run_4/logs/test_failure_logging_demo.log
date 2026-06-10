@@ -1,0 +1,7 @@
+2026-06-10 13:35:00,687 INFO Starting test: tests/test_failure_logging_demo.py::test_failure_logging_demo
+2026-06-10 13:35:01,253 INFO Step 1: Open the Sauce Demo login page.
+2026-06-10 13:35:01,253 INFO Step 2: Try logging in with standard demo credentials.
+2026-06-10 13:35:01,339 INFO Step 3: The next check is intentionally wrong to trigger a failure report.
+2026-06-10 13:35:01,340 ERROR Test failed: tests/test_failure_logging_demo.py::test_failure_logging_demo
+2026-06-10 13:35:01,409 ERROR Failure screenshot saved to /Users/shreya/Desktop/PWPYTHON_FRAMEWORK/reports/artifacts/screenshots/test_failure_logging_demo.png
+2026-06-10 13:35:01,431 INFO Finished test: tests/test_failure_logging_demo.py::test_failure_logging_demo

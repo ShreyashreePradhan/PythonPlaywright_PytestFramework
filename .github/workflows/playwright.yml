@@ -31,17 +31,15 @@ jobs:
         # Installs chromium, firefox, webkit and their OS-level system dependencies
         playwright install --with-deps
 
-    - name: Run Playwright tests
+    - name: Run Playwright tests and generate reports
       run: |
-        # Runs tests in headless mode (required for CI) and generates JUnit reports
-        pytest --html=report.html
+        python utils/generate_reports.py
 
     - name: Upload Test Artifacts
-      if: always() # Ensures reports upload even if tests fail
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: pytest-results
         path: |
-          results.xml
-          actual_screenshots/
+          reports/
         retention-days: 30

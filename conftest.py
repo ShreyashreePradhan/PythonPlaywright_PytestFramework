@@ -4,6 +4,8 @@ import os
 import pytest
 from playwright.sync_api import sync_playwright
 
+from utils.report_paths import LOGS_DIR, SCREENSHOTS_DIR, ensure_artifact_dirs
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -52,15 +54,15 @@ def browser(playwright_instance, request):
 @pytest.fixture(scope="function", autouse=True)
 def failure_logger(request):
     """Create a per-test log file for failure analysis on every test."""
-    log_dir = os.path.join(str(request.config.rootdir), "logs")
-    os.makedirs(log_dir, exist_ok=True)
+    ensure_artifact_dirs()
+    log_dir = LOGS_DIR
 
     logger = logging.getLogger(f"pytest.failure.{request.node.name}")
     logger.setLevel(logging.INFO)
     logger.handlers.clear()
     logger.propagate = False
 
-    log_file = os.path.join(log_dir, f"{request.node.name}.log")
+    log_file = log_dir / f"{request.node.name}.log"
     handler = logging.FileHandler(log_file, mode="w", encoding="utf-8")
     handler.setFormatter(logging.Formatter("%(asctime)s %(levelname)s %(message)s"))
     logger.addHandler(handler)
@@ -90,14 +92,14 @@ def pytest_runtest_makereport(item, call):
     if rep.when == "call" and rep.failed:
         page = item.funcargs.get("page")
         logger = item.funcargs.get("failure_logger")
-        screenshots_dir = os.path.join(str(item.config.rootdir), "screenshots")
-        os.makedirs(screenshots_dir, exist_ok=True)
+        ensure_artifact_dirs()
+        screenshots_dir = SCREENSHOTS_DIR
 
         if logger:
             logger.error("Test failed: %s", item.nodeid)
 
         if page:
-            screenshot_path = os.path.join(screenshots_dir, f"{item.name}.png")
+            screenshot_path = screenshots_dir / f"{item.name}.png"
             try:
                 page.screenshot(path=screenshot_path, full_page=True)
             except Exception as exc:

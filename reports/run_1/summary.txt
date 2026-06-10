@@ -1,0 +1,10 @@
+Execution Summary
+
+Total Tests : 6
+Passed      : 5
+Failed      : 0
+Pass Rate   : 83.3%
+
+Build Number: 1
+Environment : QA
+Duration    : 1 mins

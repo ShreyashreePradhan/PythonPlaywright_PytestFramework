@@ -2,7 +2,7 @@
 import pytest
 from pages.login_page import LoginPage
 
-@pytest.mark.xfail
+# @pytest.mark.xfail
 def test_failure_logging_demo(page, failure_logger):
     """This test is expected to fail so the failure-reporting hooks can be shown.
 

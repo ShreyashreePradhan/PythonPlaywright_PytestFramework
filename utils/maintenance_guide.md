@@ -24,9 +24,11 @@ Use this folder when the Sauce Demo UI changes.
 
 ## Failure reporting
 
-- Logs are written to logs/<test-name>.log for every test run.
-- Screenshots are saved to screenshots/<test-name>.png when a test fails.
+- Logs are written to reports/artifacts/logs/<test-name>.log for every test run.
+- Screenshots are saved to reports/artifacts/screenshots/<test-name>.png when a test fails.
+- The report generator copies these artifacts into reports/run_<n>/ so the final bundle stays in one place.
 - Use the demo test tests/test_failure_logging_demo.py to see this behavior in action.
+- For CI/local report bundles, run `python utils/generate_reports.py` to create reports/run_<n>/ with logs, report.html, results.xml, screenshots, and summary.txt.
 
 ## Quick validation
 
