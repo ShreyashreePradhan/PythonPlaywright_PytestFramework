@@ -1,5 +1,5 @@
-2026-06-10 14:26:45,913 INFO Starting test: tests/test_failure_logging_demo.py::test_failure_logging_demo
-2026-06-10 14:26:46,618 INFO Step 1: Open the Sauce Demo login page.
-2026-06-10 14:26:46,619 INFO Step 2: Try logging in with standard demo credentials.
-2026-06-10 14:26:46,699 INFO Step 3: The next check is intentionally wrong to trigger a failure report.
-2026-06-10 14:26:46,716 INFO Finished test: tests/test_failure_logging_demo.py::test_failure_logging_demo
+2026-06-10 15:10:54,138 INFO Starting test: tests/test_failure_logging_demo.py::test_failure_logging_demo
+2026-06-10 15:10:54,816 INFO Step 1: Open the Sauce Demo login page.
+2026-06-10 15:10:54,816 INFO Step 2: Try logging in with standard demo credentials.
+2026-06-10 15:10:54,888 INFO Step 3: The next check is intentionally wrong to trigger a failure report.
+2026-06-10 15:10:54,906 INFO Finished test: tests/test_failure_logging_demo.py::test_failure_logging_demo

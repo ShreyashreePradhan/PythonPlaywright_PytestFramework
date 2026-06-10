@@ -30,8 +30,8 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v5
       with:
-        python-version: '3.11'
-        cache: 'pip'
+        python-version: "3.11"
+        cache: pip
 
     - name: Install dependencies
       run: |
@@ -42,9 +42,41 @@ jobs:
       run: |
         playwright install --with-deps
 
-    - name: Run Playwright tests and generate reports
+    - name: Install Allure CLI
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y default-jre
+
+        wget https://github.com/allure-framework/allure2/releases/download/2.34.1/allure-2.34.1.tgz
+
+        tar -zxvf allure-2.34.1.tgz
+
+        sudo mv allure-2.34.1 /opt/allure
+
+        echo "/opt/allure/bin" >> $GITHUB_PATH
+
+    - name: Run Playwright Tests
       run: |
         python utils/generate_reports.py
+
+    - name: Verify Allure Results
+      if: always()
+      run: |
+        echo "=== reports/run_*/allure-results ==="
+        find reports -maxdepth 3 -type d -name 'allure-results' -print || true
+
+    - name: Generate Allure Report
+      if: always()
+      run: |
+        rm -rf allure-results allure-report site
+
+        if [ -d "reports/run_*/allure-results" ]; then
+          latest_run=$(ls -dt reports/run_* | head -1)
+          allure generate "$latest_run/allure-results" -o "$latest_run/allure-report" --clean
+        else
+          echo "No Allure results found under reports/" >&2
+          exit 1
+        fi
 
     - name: Setup Pages
       uses: actions/configure-pages@v5
@@ -53,8 +85,9 @@ jobs:
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: pytest-results
-        path: reports/
+        name: test-artifacts
+        path: |
+          reports/
         retention-days: 30
 
     - name: Publish Test Summary
@@ -64,33 +97,34 @@ jobs:
 
         echo "# Playwright Test Results" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
-        echo "Latest Build: $latest_run" >> $GITHUB_STEP_SUMMARY
         echo "Workflow Run: $GITHUB_RUN_NUMBER" >> $GITHUB_STEP_SUMMARY
-        echo "Commit: $GITHUB_SHA" >> $GITHUB_STEP_SUMMARY
+        echo "Commit: ${GITHUB_SHA:0:7}" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
 
         if [ -f "$latest_run/summary.txt" ]; then
           cat "$latest_run/summary.txt" >> $GITHUB_STEP_SUMMARY
-        else
-          echo "No summary file found." >> $GITHUB_STEP_SUMMARY
         fi
+
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## Allure Report" >> $GITHUB_STEP_SUMMARY
+        echo "Published to GitHub Pages after deployment." >> $GITHUB_STEP_SUMMARY
 
     - name: Prepare GitHub Pages Site
       if: always()
       run: |
+        rm -rf site
         latest_run=$(ls -dt reports/run_* | head -1)
 
         mkdir -p site
-
-        cp "$latest_run/report.html" site/index.html
-        cp "$latest_run/summary.txt" site/summary.txt
-        cp "$latest_run/results.xml" site/results.xml
-
-        if [ -d "$latest_run/screenshots" ]; then
-          cp -r "$latest_run/screenshots" site/
+        if [ -d "$latest_run/allure-report" ]; then
+          cp -r "$latest_run/allure-report"/* site/
+        else
+          echo "No Allure report found in $latest_run" >&2
+          exit 1
         fi
 
-        echo "Latest report deployed: $latest_run" > site/build-info.txt
+        cp "$latest_run/summary.txt" site/summary.txt
+        cp "$latest_run/results.xml" site/results.xml
 
     - name: Upload GitHub Pages Artifact
       if: always()

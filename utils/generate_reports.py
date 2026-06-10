@@ -35,6 +35,11 @@ def copy_artifacts(run_dir: Path) -> None:
     logs_target = run_dir / "logs"
     screenshots_target = run_dir / "screenshots"
 
+    if logs_target.exists():
+        shutil.rmtree(logs_target)
+    if screenshots_target.exists():
+        shutil.rmtree(screenshots_target)
+
     ensure_artifact_dirs()
     if LOGS_DIR.exists():
         shutil.copytree(LOGS_DIR, logs_target, dirs_exist_ok=True)
@@ -91,13 +96,20 @@ Duration    : {duration_minutes} mins
 
 
 def main() -> int:
+    if ARTIFACTS_DIR.exists():
+        shutil.rmtree(ARTIFACTS_DIR)
+    for stale in (REPO_ROOT / "allure-results", REPO_ROOT / "allure-report", REPO_ROOT / "site"):
+        if stale.exists():
+            shutil.rmtree(stale)
+
     ensure_artifact_dirs()
     run_number = next_run_number()
     run_dir = REPORTS_DIR / f"run_{run_number}"
     run_dir.mkdir(exist_ok=True)
 
-    html_path = run_dir / "report.html"
     xml_path = run_dir / "results.xml"
+    allure_results_dir = run_dir / "allure-results"
+    allure_report_dir = run_dir / "allure-report"
 
     start = time.time()
     cmd = [
@@ -105,14 +117,19 @@ def main() -> int:
         "-m",
         "pytest",
         "-v",
-        "--html",
-        str(html_path),
-        "--self-contained-html",
+        "--alluredir",
+        str(allure_results_dir),
         "--junitxml",
         str(xml_path),
     ]
 
     result = subprocess.run(cmd, cwd=REPO_ROOT)
+
+    allure_cli = shutil.which("allure")
+    if allure_cli:
+        subprocess.run([allure_cli, "generate", str(allure_results_dir), "-o", str(allure_report_dir), "--clean"], cwd=REPO_ROOT, check=False)
+    else:
+        print("Allure CLI not found; skipping HTML report generation.")
 
     duration_minutes = max(1, int((time.time() - start) // 60))
     copy_artifacts(run_dir)
@@ -129,7 +146,8 @@ def main() -> int:
     print(f"\nReport generated at: {run_dir}")
     print(f"Summary saved to: {run_dir / 'summary.txt'}")
     print(f"Results XML: {xml_path}")
-    print(f"HTML Report: {html_path}")
+    print(f"Allure Results: {allure_results_dir}")
+    print(f"Allure Report: {allure_report_dir}")
 
     return result.returncode
 
