@@ -1,10 +1,14 @@
 Execution Summary
 
+Build Number: 1
+Run Folder  : run_1
+Status      : Passed
 Total Tests : 6
 Passed      : 5
 Failed      : 0
 Pass Rate   : 83.3%
-
-Build Number: 1
+Commit      : local
+Branch      : local
+Trigger     : manual
 Environment : QA
 Duration    : 1 mins

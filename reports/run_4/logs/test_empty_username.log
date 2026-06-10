@@ -1,2 +1,0 @@
-2026-06-10 13:35:02,852 INFO Starting test: tests/test_login.py::test_empty_username
-2026-06-10 13:35:03,549 INFO Finished test: tests/test_login.py::test_empty_username

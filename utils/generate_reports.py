@@ -1,5 +1,6 @@
 """Generate per-run pytest reports under reports/run_<n>."""
 
+import os
 import shutil
 import subprocess
 import sys
@@ -65,14 +66,24 @@ def parse_junit(path: Path) -> dict:
 
 
 def generate_summary(run_dir: Path, stats: dict, duration_minutes: int) -> None:
+    build_number = run_dir.name.split("_")[1]
+    commit = os.getenv("GITHUB_SHA", "local")
+    branch = os.getenv("GITHUB_REF_NAME", "local")
+    event = os.getenv("GITHUB_EVENT_NAME", "manual")
+    short_commit = commit[:7] if commit and commit != "local" else "local"
+
     summary = f"""Execution Summary
 
+Build Number: {build_number}
+Run Folder  : {run_dir.name}
+Status      : {'Passed' if stats['failed'] == 0 else 'Failed'}
 Total Tests : {stats['total']}
 Passed      : {stats['passed']}
 Failed      : {stats['failed']}
 Pass Rate   : {stats['pass_rate']}%
-
-Build Number: {run_dir.name.split('_')[1]}
+Commit      : {short_commit}
+Branch      : {branch}
+Trigger     : {event}
 Environment : QA
 Duration    : {duration_minutes} mins
 """

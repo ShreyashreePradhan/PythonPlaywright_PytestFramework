@@ -1,2 +1,0 @@
-2026-06-10 13:35:01,432 INFO Starting test: tests/test_login.py::test_successful_login
-2026-06-10 13:35:02,152 INFO Finished test: tests/test_login.py::test_successful_login
